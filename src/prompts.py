@@ -11,7 +11,7 @@ Rules:
 The JSON must look exactly like this:
 {
   "title": "...",
-  "summary": "...",
+  "overview": "...",
   "key_points": [
     {"point": "...", "source_ids": [1]}
   ],

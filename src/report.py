@@ -1,7 +1,10 @@
 import json
+from pydantic import ValidationError
 from src.llm import call
 from src.models import Report
 from src.prompts import REPORT_V1_SYSTEM
+
+MAX_ATTEMPTS = 3
 
 
 def strip_fences(text):
@@ -12,14 +15,21 @@ def strip_fences(text):
     return text.strip()
 
 
-def generate_report(sources_text):
-    raw, usage = call(
-        [{"role": "user", "content": sources_text}],
-        system=REPORT_V1_SYSTEM,
-    )
-    print("----- RAW AI OUTPUT -----")
-    print(raw)
-    print("-------------------------")
+def generate_report(sources_text, max_attempts=MAX_ATTEMPTS):
+    messages = [{"role": "user", "content": sources_text}]
 
-    data = json.loads(strip_fences(raw))
-    return Report.model_validate(data)
+    for attempt in range(1, max_attempts + 1):
+        raw, usage = call(messages, system=REPORT_V1_SYSTEM)
+        try:
+            data = json.loads(strip_fences(raw))
+            return Report.model_validate(data)
+        except (json.JSONDecodeError, ValidationError) as e:
+            print(f"[attempt {attempt}] failed: {type(e).__name__}")
+            messages.append({"role": "assistant", "content": raw})
+            messages.append({
+                "role": "user",
+                "content": f"Your last output failed validation with this error: {e}\n"
+                           "Return corrected JSON only.",
+            })
+
+    raise RuntimeError(f"Could not get valid JSON after {max_attempts} attempts")
