@@ -21,3 +21,5 @@ The JSON must look exactly like this:
   ]
 }
 """
+MAP_SYSTEM = """Summarize the following text in under 150 words.
+Keep concrete facts, numbers, and names. Do not add anything not in the text."""
