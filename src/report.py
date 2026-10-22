@@ -33,3 +33,11 @@ def generate_report(sources_text, system=REPORT_V2_SYSTEM, max_attempts=MAX_ATTE
             })
 
     raise RuntimeError(f"Could not get valid JSON after {max_attempts} attempts")
+def to_markdown(report):
+    lines = [f"# {report.title}", "", "## Summary", report.summary, "", "## Key points"]
+    for kp in report.key_points:
+        refs = " ".join(f"[{i}]" for i in kp.source_ids)
+        lines.append(f"- {kp.point} {refs}")
+    lines += ["", "## Open questions"] + [f"- {q}" for q in report.open_questions]
+    lines += ["", "## Sources"] + [f"{s.id}. [{s.title}]({s.url})" for s in report.sources]
+    return "\n".join(lines)
