@@ -15,3 +15,12 @@ def stream(messages, system="", max_tokens=MAX_TOKENS):
     for chunk in response:
         if chunk.choices and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content
+def call(messages, system="", max_tokens=MAX_TOKENS):
+    """One request, returns (full reply text, token usage)."""
+    if system:
+        messages = [{"role": "system", "content": system}] + messages
+
+    response = client.chat.completions.create(
+        model=MODEL, messages=messages, max_tokens=max_tokens
+    )
+    return response.choices[0].message.content, response.usage
