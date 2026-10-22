@@ -2,7 +2,7 @@ import json
 from pydantic import ValidationError
 from src.llm import call
 from src.models import Report
-from src.prompts import REPORT_V1_SYSTEM
+from src.prompts import REPORT_V2_SYSTEM
 
 MAX_ATTEMPTS = 3
 
@@ -15,14 +15,14 @@ def strip_fences(text):
     return text.strip()
 
 
-def generate_report(sources_text, max_attempts=MAX_ATTEMPTS):
+def generate_report(sources_text, system=REPORT_V2_SYSTEM, max_attempts=MAX_ATTEMPTS):
+    """REDUCE step: turn summaries into a validated Report, retrying on bad JSON."""
     messages = [{"role": "user", "content": sources_text}]
 
     for attempt in range(1, max_attempts + 1):
-        raw, usage = call(messages, system=REPORT_V1_SYSTEM)
+        raw, usage = call(messages, system=system)
         try:
-            data = json.loads(strip_fences(raw))
-            return Report.model_validate(data)
+            return Report.model_validate(json.loads(strip_fences(raw)))
         except (json.JSONDecodeError, ValidationError) as e:
             print(f"[attempt {attempt}] failed: {type(e).__name__}")
             messages.append({"role": "assistant", "content": raw})

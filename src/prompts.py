@@ -23,3 +23,10 @@ The JSON must look exactly like this:
 """
 MAP_SYSTEM = """Summarize the following text in under 150 words.
 Keep concrete facts, numbers, and names. Do not add anything not in the text."""
+# V2 fixes a flaw we saw in V1: citation markers like [1] leaked into the text.
+REPORT_V2_SYSTEM = REPORT_V1_SYSTEM + """
+Extra rules:
+- Do NOT write citation markers like [1] inside the point text. Use source_ids only.
+- Write 4 to 8 key points and 2 to 4 open questions.
+- If sources contradict each other, say so in a key point.
+"""
