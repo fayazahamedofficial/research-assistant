@@ -3,6 +3,7 @@
 Paste URLs, get a structured research report where every key point cites the source it came from.
 
 ![ResearchLens screenshot](docs/screenshot.png)
+**Live demo:** https://researchlenz.streamlit.app/
 ## Problem
 
 Researching a topic means opening many tabs and skimming long pages. ResearchLens does the first pass and shows where each claim came from, so you can verify it.
