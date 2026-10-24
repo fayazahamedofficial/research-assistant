@@ -21,8 +21,10 @@ The JSON must look exactly like this:
   ]
 }
 """
+
 MAP_SYSTEM = """Summarize the following text in under 150 words.
 Keep concrete facts, numbers, and names. Do not add anything not in the text."""
+
 # V2 fixes a flaw we saw in V1: citation markers like [1] leaked into the text.
 REPORT_V2_SYSTEM = REPORT_V1_SYSTEM + """
 Extra rules:
@@ -30,6 +32,16 @@ Extra rules:
 - Write 4 to 8 key points and 2 to 4 open questions.
 - If sources contradict each other, say so in a key point.
 """
+
+# V3 fixes a failure seen in eval: open_questions came back as objects instead of strings.
+REPORT_V3_SYSTEM = REPORT_V2_SYSTEM + """
+Format rules:
+- open_questions must be a list of plain strings, for example ["What is X?", "How does Y work?"].
+  Never use objects such as {"point": "..."} inside open_questions.
+- Only key_points items are objects, each with "point" and "source_ids".
+"""
+
+# Used by the app: the length of the report depends on the Depth setting.
 DEPTH_RULES = {
     "Quick": """
 Length rules (Quick mode):
@@ -47,9 +59,10 @@ Length rules (Detailed mode):
 
 
 def build_report_system(depth="Quick"):
-    """Base report prompt + citation rules + length rules for the chosen depth."""
+    """Base report prompt + citation and format rules + length rules for the chosen depth."""
     return REPORT_V1_SYSTEM + """
 Extra rules:
 - Do NOT write citation markers like [1] inside the point text. Use source_ids only.
 - If sources contradict each other, say so in a key point.
+- open_questions must be a list of plain strings, never objects.
 """ + DEPTH_RULES[depth]

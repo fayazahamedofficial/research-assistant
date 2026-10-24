@@ -3,15 +3,16 @@ import json
 import random
 import re
 import time
+from datetime import datetime
 from pathlib import Path
 
 from src.fetcher import fetch_url, FetchError
-from src.prompts import REPORT_V1_SYSTEM, REPORT_V2_SYSTEM
+from src.prompts import REPORT_V1_SYSTEM, REPORT_V2_SYSTEM, REPORT_V3_SYSTEM
 from src.report import generate_report
 from src.summarizer import build_digest
 
-VERSIONS = {"V1": REPORT_V1_SYSTEM, "V2": REPORT_V2_SYSTEM}
-REPEATS = 2        # run each version this many times per topic (the AI varies)
+VERSIONS = {"V1": REPORT_V1_SYSTEM, "V2": REPORT_V2_SYSTEM, "V3": REPORT_V3_SYSTEM}
+REPEATS = 3        # run each version this many times per topic (the AI varies)
 MAX_CHUNKS = 2     # chunks per page, keeps API usage low
 
 HERE = Path(__file__).parent
@@ -113,17 +114,19 @@ def main():
     (HERE / "summary.md").write_text(summary, encoding="utf-8")
     print("\n" + summary)
 
-    # Sample key points for YOU to check by hand
+    # Sample key points for YOU to check by hand (timestamped, never overwrites)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M")
+    check_path = HERE / f"manual_check_{stamp}.md"
     out = ["# Manual citation check",
-           "For each point: open the cited source, search for the fact, write yes or no.\n"]
+           "For each point: open the cited source, search for the fact, write yes, partly or no.\n"]
     for i, version, urls, report in samples:
         out.append(f"## Topic {i} - {version}")
         out.append("Sources: " + " | ".join(f"{n}={u}" for n, u in enumerate(urls, 1)))
         for kp in random.sample(report.key_points, min(2, len(report.key_points))):
             out.append(f"- {kp.point}  -> cites {kp.source_ids}  | correct? ")
         out.append("")
-    (HERE / "manual_check.md").write_text("\n".join(out), encoding="utf-8")
-    print("\nSaved: eval/results.csv, eval/summary.md, eval/manual_check.md")
+    check_path.write_text("\n".join(out), encoding="utf-8")
+    print(f"\nSaved: eval/results.csv, eval/summary.md, eval/{check_path.name}")
 
 
 if __name__ == "__main__":
