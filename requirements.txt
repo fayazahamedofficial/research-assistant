@@ -1,5 +1,7 @@
-openai
-python-dotenv
-pydantic
-requests
-beautifulsoup4
+   openai
+   python-dotenv
+   pydantic
+   requests
+   beautifulsoup4
+   streamlit
+   pytest
