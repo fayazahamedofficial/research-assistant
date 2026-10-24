@@ -15,13 +15,19 @@ def strip_fences(text):
     return text.strip()
 
 
-def generate_report(sources_text, system=None, max_attempts=MAX_ATTEMPTS):
-    """REDUCE step: turn summaries into a validated Report, retrying on bad JSON."""
+def generate_report(sources_text, system=None, max_attempts=MAX_ATTEMPTS, stats=None):
+    """REDUCE step: turn summaries into a validated Report, retrying on bad JSON.
+    If a dict is passed as `stats`, it is filled with attempts and token counts."""
     system = system or build_report_system("Quick")
+    stats = stats if stats is not None else {}
+    stats.update(attempts=0, input_tokens=0, output_tokens=0)
     messages = [{"role": "user", "content": sources_text}]
 
     for attempt in range(1, max_attempts + 1):
         raw, usage = call(messages, system=system)
+        stats["attempts"] = attempt
+        stats["input_tokens"] += getattr(usage, "prompt_tokens", 0) or 0
+        stats["output_tokens"] += getattr(usage, "completion_tokens", 0) or 0
         try:
             return Report.model_validate(json.loads(strip_fences(raw)))
         except (json.JSONDecodeError, ValidationError) as e:
