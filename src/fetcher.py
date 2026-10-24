@@ -25,8 +25,7 @@ def fetch_url(url, timeout=15):
     except requests.RequestException as e:
         raise FetchError(f"Could not fetch {url}: {e}")
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-
+    soup = BeautifulSoup(resp.content, "html.parser")
     # Remove parts that are never the article itself
     for tag in soup(["script", "style", "nav", "footer", "header",
                      "aside", "form", "noscript"]):
