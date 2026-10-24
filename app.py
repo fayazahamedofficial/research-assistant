@@ -31,7 +31,7 @@ if st.button("Generate report", type="primary"):
         st.session_state["count"] += 1
         with st.spinner("Reading pages and writing the report. This can take a minute on the free tier..."):
             try:
-                report, errors = research_from_urls(urls, max_chunks=MAX_CHUNKS[depth])
+                report, errors = research_from_urls(urls, max_chunks=MAX_CHUNKS[depth], depth=depth)
             except Exception as e:
                 st.error(f"Something went wrong: {e}")
                 st.stop()

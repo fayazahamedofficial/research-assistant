@@ -1,10 +1,11 @@
 from src.fetcher import fetch_url, FetchError
 from src.models import Source
+from src.prompts import build_report_system
 from src.report import generate_report
 from src.summarizer import build_digest
 
 
-def research_from_urls(urls, max_chunks=None):
+def research_from_urls(urls, max_chunks=None, depth="Quick"):
     pages, errors = [], []
     for url in urls:
         try:
@@ -17,7 +18,7 @@ def research_from_urls(urls, max_chunks=None):
 
     digest = build_digest(pages, max_chunks=max_chunks)
     print("Writing the final report...")
-    report = generate_report(digest)
+    report = generate_report(digest, system=build_report_system(depth))
 
     # Don't trust the AI for sources: use the real ones we fetched
     report.sources = [Source(id=i, title=p["title"], url=p["url"])

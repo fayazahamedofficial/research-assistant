@@ -30,3 +30,26 @@ Extra rules:
 - Write 4 to 8 key points and 2 to 4 open questions.
 - If sources contradict each other, say so in a key point.
 """
+DEPTH_RULES = {
+    "Quick": """
+Length rules (Quick mode):
+- summary: 2 sentences.
+- 4 to 5 key points, each one short sentence.
+- 2 open questions.
+""",
+    "Detailed": """
+Length rules (Detailed mode):
+- summary: one paragraph of 4 to 6 sentences.
+- 9 to 12 key points, each with specific facts, numbers and names.
+- 4 to 5 open questions.
+""",
+}
+
+
+def build_report_system(depth="Quick"):
+    """Base report prompt + citation rules + length rules for the chosen depth."""
+    return REPORT_V1_SYSTEM + """
+Extra rules:
+- Do NOT write citation markers like [1] inside the point text. Use source_ids only.
+- If sources contradict each other, say so in a key point.
+""" + DEPTH_RULES[depth]

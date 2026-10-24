@@ -2,7 +2,7 @@ import json
 from pydantic import ValidationError
 from src.llm import call
 from src.models import Report
-from src.prompts import REPORT_V2_SYSTEM
+from src.prompts import build_report_system
 
 MAX_ATTEMPTS = 3
 
@@ -15,8 +15,9 @@ def strip_fences(text):
     return text.strip()
 
 
-def generate_report(sources_text, system=REPORT_V2_SYSTEM, max_attempts=MAX_ATTEMPTS):
+def generate_report(sources_text, system=None, max_attempts=MAX_ATTEMPTS):
     """REDUCE step: turn summaries into a validated Report, retrying on bad JSON."""
+    system = system or build_report_system("Quick")
     messages = [{"role": "user", "content": sources_text}]
 
     for attempt in range(1, max_attempts + 1):
@@ -33,6 +34,8 @@ def generate_report(sources_text, system=REPORT_V2_SYSTEM, max_attempts=MAX_ATTE
             })
 
     raise RuntimeError(f"Could not get valid JSON after {max_attempts} attempts")
+
+
 def to_markdown(report):
     lines = [f"# {report.title}", "", "## Summary", report.summary, "", "## Key points"]
     for kp in report.key_points:
